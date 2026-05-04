@@ -1,55 +1,77 @@
 # Contraceptive Usage Prediction — Logistic Regression
 
-This project is a classification problem — instead of predicting a number like rent price, the model predicts a category: does a woman use contraception or not? That shift from regression to classification changes how you think about what "good performance" actually means.
+Unlike my linear regression project where I was predicting a number, this one was about predicting a yes or no. That difference sounds small but it changes everything — how you build the model, how you evaluate it, and most importantly, how you decide whether it's actually good enough.
 
 ---
 
-## What I was trying to predict
+## What the project is about
 
-Given socio-demographic information about a woman — her age, education level, number of children, husband's occupation, standard of living index, media exposure, and religion — predict whether she uses contraception.
+The dataset is survey data from married women in Indonesia. Based on things like a woman's age, how many children she has, her education level, her husband's occupation, and whether she's exposed to media — the model tries to predict whether she uses contraception or not.
+
+It's the kind of dataset where getting the prediction wrong isn't just a number on a scorecard. That kept me more careful than usual.
 
 ---
 
 ## The dataset
 
-Contraceptive Method Dataset (`Contraceptive_method_dataset.xlsx`) — survey data collected from married women in Indonesia, covering demographic and socio-economic factors alongside contraceptive usage.
+- <a href="https://github.com/GeethatheAnalyst/Contraceptive-usage-Logistic-Regression/blob/main/Contraceptive_method_dataset.xlsx">Contraceptive Method Dataset</a> collected from married Indonesian women, covering demographic and socio-economic factors alongside contraceptive usage.
 
 ---
 
-## What I did
+## How I approached it
 
-**Step 1 — Understanding the target variable**
-The target column `Contraceptive_method_used` was binary — Yes or No. Before anything else, I checked the class balance to make sure the model wouldn't just learn to predict the majority class.
+**Encoding the features**
+Before anything else, all the categorical columns needed to be turned into numbers. But I didn't just slap numbers on them randomly.
 
-**Step 2 — Encoding categorical features**
-All categorical columns needed to be converted to numbers before the model could use them. I was careful about *how* I encoded them:
+For education level — Uneducated, Primary, Secondary, Tertiary — I encoded them as 1, 2, 3, 4 in that order. There's a real hierarchy there and the model should know that Tertiary is "more" than Primary, not just different. For binary columns like Wife_Working, 0 and 1 was enough.
 
-- Ordinal features (like education level: Uneducated → Primary → Secondary → Tertiary) were encoded as 1–4 to preserve the natural order
-- Binary features (like Wife_Working: Yes/No) were encoded as 0 and 1
+It's a small decision but the wrong encoding here would have quietly broken the model without any obvious error message.
 
-Using the wrong encoding here — for example treating education as unordered categories — would have lost meaningful information.
+**Train-test split**
+70% of the data for training, 30% held back for testing. The model never sees the test set during training — that's how you know whether it actually learned something or just memorised the data.
 
-**Step 3 — Train-test split**
-Split the data 70% training and 30% testing using scikit-learn's `train_test_split`. The model learns from the 70% and is evaluated on the 30% it has never seen.
+**Building the model**
+Used scikit-learn's LogisticRegression. Straightforward to set up — the real thinking was in what came before and after, not the model call itself.
 
-**Step 4 — Building the model**
-Built the logistic regression model using scikit-learn's `LogisticRegression`. Logistic regression works well here because the relationship between the features and the outcome is reasonably linear in log-odds terms.
-
-**Step 5 — Evaluation**
-Evaluated using a confusion matrix and a full classification report (precision, recall, F1-score).
-
-The model achieved **0.84 recall** on the test set.
+**Evaluating the results**
+This is where it got interesting. The model hit **0.84 recall** on the test set.
 
 ---
 
-## Why recall was the metric that mattered here
+## Why I cared about recall more than accuracy
 
-This is worth explaining properly.
+When I first looked at the results, overall accuracy seemed fine. But I kept coming back to one question — what kind of mistake is worse here?
 
-In a health-related dataset like this, the two types of errors are not equal:
-- **False Positive** — predicting someone uses contraception when they don't → minor issue
-- **False Negative** — predicting someone doesn't use contraception when they do → a bigger problem in a health/policy context
+There are two ways to be wrong:
+- Predict someone uses contraception when they don't — not ideal, but manageable
+- Predict someone doesn't use contraception when they actually do — in a health or policy setting, this is the one you really want to avoid
 
-Recall measures how well the model catches actual positive cases (contraceptive users). At 0.84, the model correctly identified 84% of real contraceptive users — missing only 16%. That's what matters here, not overall accuracy.
+Recall is the metric that tells you how many actual contraceptive users the model caught. At 0.84, it found 84 out of every 100 real users correctly. That felt like the right thing to optimise for here — not just chasing a high accuracy number.
 
 ---
+
+## What I took away from this
+
+The technical part — fitting a logistic regression model — honestly wasn't the hardest part. What took more thought was figuring out which metric actually mattered and why. That's something I want to carry into every project going forward.
+
+---
+
+## Tools used
+
+- Python 3
+- Pandas, NumPy
+- scikit-learn (LogisticRegression, train_test_split, confusion_matrix, classification_report)
+- Matplotlib, Seaborn
+- Jupyter Notebook
+
+---
+
+## Files in this repo
+
+- <a href="https://github.com/GeethatheAnalyst/Contraceptive-usage-Logistic-Regression/blob/main/Logistic%20Regression%20Project.ipynb">Full notebook</a> with code and outputs 
+
+---
+
+## Dataset
+
+Contraceptive Method Dataset provided as part of ML coursework at RRC Technologies, Thanjavur.
